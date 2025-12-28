@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Danial Store - Premium Shopping Experience</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+      :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --card-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        --hover-shadow: 0 30px 80px rgba(0,0,0,0.15);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      /* Animated background elements */
+      .bg-decoration {
+        position: fixed;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .floating-circle {
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        animation: float 6s ease-in-out infinite;
+      }
+
+      .circle-1 {
+        width: 80px;
+        height: 80px;
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+      }
+
+      .circle-2 {
+        width: 120px;
+        height: 120px;
+        top: 60%;
+        right: 15%;
+        animation-delay: 2s;
+      }
+
+      .circle-3 {
+        width: 60px;
+        height: 60px;
+        bottom: 20%;
+        left: 20%;
+        animation-delay: 4s;
+      }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        33% { transform: translateY(-20px) rotate(5deg); }
+        66% { transform: translateY(10px) rotate(-5deg); }
+      }
+
+      /* Main container */
+      .main-container {
+        position: relative;
+        z-index: 2;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .welcome-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 30px;
+        box-shadow: var(--card-shadow);
+        padding: 60px 40px;
+        text-align: center;
+        max-width: 600px;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 1s ease-out;
+      }
+
+      .welcome-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: var(--primary-gradient);
+        border-radius: 30px 30px 0 0;
+      }
+
+      .store-icon {
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: white;
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        animation: pulse 2s infinite;
+        margin: 0 auto 30px;
+      }
+
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+
+      .welcome-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 20px;
+        line-height: 1.2;
+      }
+
+      .welcome-subtitle {
+        font-size: 1.3rem;
+        color: #64748b;
+        margin-bottom: 40px;
+        font-weight: 400;
+        line-height: 1.6;
+      }
+
+      .cta-button {
+        background: var(--secondary-gradient);
+        border: none;
+        padding: 18px 50px;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 15px 40px rgba(245, 87, 108, 0.4);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .cta-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 25px 60px rgba(245, 87, 108, 0.5);
+        color: white;
+      }
+
+      .cta-button:hover::before {
+        left: 100%;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 30px;
+        margin-top: 60px;
+        padding-top: 40px;
+        border-top: 1px solid rgba(102, 126, 234, 0.1);
+      }
+
+      .feature-item {
+        text-align: center;
+        padding: 20px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        animation: fadeInUp 1s ease-out;
+      }
+
+      .feature-item:nth-child(1) { animation-delay: 0.2s; }
+      .feature-item:nth-child(2) { animation-delay: 0.4s; }
+      .feature-item:nth-child(3) { animation-delay: 0.6s; }
+
+      .feature-item:hover {
+        transform: translateY(-10px);
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+      }
+
+      .feature-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 15px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin-bottom: 15px;
+      }
+
+      .feature-icon.quality { background: var(--success-gradient); }
+      .feature-icon.shipping { background: var(--accent-gradient); }
+      .feature-icon.support { background: var(--secondary-gradient); }
+
+      .feature-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 8px;
+      }
+
+      .feature-desc {
+        font-size: 0.9rem;
+        color: #64748b;
+        line-height: 1.4;
+      }
+
+      .stats-section {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 50px;
+        flex-wrap: wrap;
+      }
+
+      .stat-item {
+        text-align: center;
+        animation: countUp 2s ease-out;
+      }
+
+      .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+      }
+
+      .stat-label {
+        font-size: 0.9rem;
+        color: #64748b;
+        text-transform: uppercase;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+
+      /* Animations */
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(60px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes countUp {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .welcome-card {
+          padding: 40px 30px;
+          margin: 20px;
+        }
+
+        .welcome-title {
+          font-size: 2.5rem;
+        }
+
+        .welcome-subtitle {
+          font-size: 1.1rem;
+        }
+
+        .cta-button {
+          padding: 15px 35px;
+          font-size: 1rem;
+        }
+
+        .features-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .stats-section {
+          gap: 30px;
+        }
+
+        .stat-number {
+          font-size: 2rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .welcome-title {
+          font-size: 2rem;
+        }
+
+        .store-icon {
+          width: 80px;
+          height: 80px;
+          font-size: 2rem;
+        }
+      }
+
+      /* Loading animation */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255,255,255,0.3);
+        border-top: 4px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading Screen -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Animated Background Elements -->
+    <div class="bg-decoration floating-circle circle-1"></div>
+    <div class="bg-decoration floating-circle circle-2"></div>
+    <div class="bg-decoration floating-circle circle-3"></div>
+
+    <div class="main-container">
+      <div class="welcome-card">
+        <div class="store-icon">
+          <i class="fas fa-store"></i>
+        </div>
+        
+        <h1 class="welcome-title">Welcome to<br>Danial Store</h1>
+        <p class="welcome-subtitle">
+          Discover premium quality products with exceptional service.<br>
+          Your ultimate shopping destination awaits!
+        </p>
+        
+        <a href="/products" class="cta-button">
+          <i class="fas fa-shopping-bag"></i>
+          Explore Products
+        </a>
+
+        <div class="stats-section">
+          <div class="stat-item">
+            <span class="stat-number" data-target="1000">0</span>
+            <span class="stat-label">Products</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" data-target="500">0</span>
+            <span class="stat-label">Happy Customers</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" data-target="50">0</span>
+            <span class="stat-label">Categories</span>
+          </div>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-item">
+            <div class="feature-icon quality">
+              <i class="fas fa-award"></i>
+            </div>
+            <h3 class="feature-title">Premium Quality</h3>
+            <p class="feature-desc">Carefully curated products that meet the highest standards</p>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon shipping">
+              <i class="fas fa-shipping-fast"></i>
+            </div>
+            <h3 class="feature-title">Fast Shipping</h3>
+            <p class="feature-desc">Quick and reliable delivery to your doorstep</p>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-icon support">
+              <i class="fas fa-headset"></i>
+            </div>
+            <h3 class="feature-title">24/7 Support</h3>
+            <p class="feature-desc">Round-the-clock customer service for your peace of mind</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Hide loading overlay after page loads
+        setTimeout(() => {
+          const loadingOverlay = document.getElementById('loadingOverlay');
+          loadingOverlay.style.opacity = '0';
+          setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+          }, 500);
+        }, 1500);
+
+        // Animated counter for statistics
+        function animateCounter(element, target, duration = 2000) {
+          const start = 0;
+          const increment = target / (duration / 16);
+          let current = start;
+          
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              element.textContent = target.toLocaleString();
+              clearInterval(timer);
+            } else {
+              element.textContent = Math.floor(current).toLocaleString();
+            }
+          }, 16);
+        }
+
+        // Start counter animation when page loads
+        setTimeout(() => {
+          document.querySelectorAll('.stat-number').forEach(stat => {
+            const target = parseInt(stat.getAttribute('data-target'));
+            animateCounter(stat, target);
+          });
+        }, 2000);
+
+        // Add ripple effect to button
+        document.querySelector('.cta-button').addEventListener('click', function(e) {
+          const ripple = document.createElement('span');
+          const rect = this.getBoundingClientRect();
+          const size = Math.max(rect.width, rect.height);
+          const x = e.clientX - rect.left - size / 2;
+          const y = e.clientY - rect.top - size / 2;
+          
+          ripple.style.cssText = `
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            left: ${x}px;
+            top: ${y}px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+          `;
+          
+          this.appendChild(ripple);
+          setTimeout(() => ripple.remove(), 600);
+        });
+
+        // Parallax effect for floating elements
+        window.addEventListener('mousemove', (e) => {
+          const circles = document.querySelectorAll('.floating-circle');
+          const x = e.clientX / window.innerWidth;
+          const y = e.clientY / window.innerHeight;
+          
+          circles.forEach((circle, index) => {
+            const intensity = (index + 1) * 10;
+            circle.style.transform = `translateX(${x * intensity}px) translateY(${y * intensity}px)`;
+          });
+        });
+
+        // Add scroll effect (if content becomes scrollable in future)
+        window.addEventListener('scroll', () => {
+          const scrollY = window.scrollY;
+          document.querySelector('.welcome-card').style.transform = `translateY(${scrollY * 0.1}px)`;
+        });
+      });
+
+      // Add CSS for ripple animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes ripple {
+          to {
+            transform: scale(2);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    </script>
+  </body>
+</html>
