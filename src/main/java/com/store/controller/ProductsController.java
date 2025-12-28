@@ -104,6 +104,7 @@ public class ProductsController {
             productDTO.setDescription(product.getDescription());
 
             model.addAttribute("productDTO", productDTO);
+            model.addAttribute("id", id);
         }
         catch(Exception ex){
             System.out.println("Exception message:" + ex.getMessage());
