@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven'
+        jdk 'JDK21'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/danial2910/mystore.git'
+            }
+        }
+
+        stage('Build & Test') {
+            steps {
+                sh 'mvn clean verify'
+            }
+        }
+
+        stage('SonarQube Scan') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=test123 -Dsonar.projectName=MyStore -Dsonar.scanner.apiBaseUrl=http://sonarqube:9000/api/v2'
+                }
+            }
+        }
+    }
+}
