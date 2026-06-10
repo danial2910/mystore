@@ -116,7 +116,7 @@ public class ProductsController {
     @PostMapping("/edit/{id}")
     public String updateProduct(Model model, @PathVariable int id, @Valid @ModelAttribute ProductDTO productDTO, BindingResult result){
         try{
-            Product product = productRepository.findById(id).get();
+            Product product = productRepository.findById(id).orElseThrow();
             model.addAttribute("product", product);
 
             if(result.hasErrors()){
@@ -162,7 +162,7 @@ public class ProductsController {
     @GetMapping("/delete/{id}")
     public String deleteProduct(Model model, @PathVariable int id){
         try{
-            Product product = productRepository.findById(id).get();
+            Product product = productRepository.findById(id).orElseThrow();
 
             Path imageFilePath = Paths.get("public/images/" + product.getImageFileName());
 
