@@ -6,24 +6,22 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
-public class ProductDTO {
+public class ItemDTO {
 
-    @NotEmpty(message = "Product name must not be empty")
     private String name;
 
-    @NotEmpty(message = "Product brand must not be empty")
     private String brand;
 
-    @NotEmpty(message = "Product category must not be empty")
+    @NotEmpty(message = "Category must not be empty")
     private String category;
 
-    @Min (0)
-    private double price;
+    @Min(value = 0, message = "Quantity must be 0 or greater")
+    private int quantity;
 
     @Size(min = 10, max = 2000, message = "Description must be between 10 and 2000 characters")
     private String description;
 
-    private MultipartFile imageFileName;
+    private MultipartFile imageFile;
 
     public String getName() {
         return name;
@@ -49,12 +47,12 @@ public class ProductDTO {
         this.category = category;
     }
 
-    public double getPrice() {
-        return price;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public String getDescription() {
@@ -65,13 +63,11 @@ public class ProductDTO {
         this.description = description;
     }
 
-    public MultipartFile getImageFileName() {
-        return imageFileName;
+    public MultipartFile getImageFile() {
+        return imageFile;
     }
 
-    public void setImageFileName(MultipartFile imageFileName) {
-        this.imageFileName = imageFileName;
+    public void setImageFile(MultipartFile imageFile) {
+        this.imageFile = imageFile;
     }
-
-    
 }
