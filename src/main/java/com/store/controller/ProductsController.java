@@ -120,7 +120,7 @@ public class ProductsController {
             model.addAttribute("product", product);
 
             if(result.hasErrors()){
-                return "redirect:/EditProduct";
+                return "redirect:/products/edit/" + id;
             }
 
             if(!productDTO.getImageFileName().isEmpty()){
