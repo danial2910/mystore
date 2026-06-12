@@ -1,5 +1,6 @@
 package com.store.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,7 +18,14 @@ public class User {
     private String username;
     private String email;
     private String password;
-    private String roles; // comma separated roles, e.g. ROLE_USER
+    private String roles;
+
+    private String fullName;
+    private String icNumber;
+    private String phoneNumber;
+    @Column(columnDefinition = "TEXT")
+    private String address;
+    private String profilePicture;
 
     public int getId() {
         return id;
@@ -57,5 +65,45 @@ public class User {
 
     public void setRoles(String roles) {
         this.roles = roles;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getIcNumber() {
+        return icNumber;
+    }
+
+    public void setIcNumber(String icNumber) {
+        this.icNumber = icNumber;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 }

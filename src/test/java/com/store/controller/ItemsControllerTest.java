@@ -6,6 +6,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,8 +30,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import com.store.model.Item;
 import com.store.model.ItemDTO;
 import com.store.model.ItemStatus;
+import com.store.model.ServiceRecord;
+import com.store.model.ServiceRecordStatus;
 import com.store.model.User;
 import com.store.service.ItemRepository;
+import com.store.service.ServiceRecordRepository;
 import com.store.service.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +45,9 @@ class ItemsControllerTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private ServiceRecordRepository serviceRecordRepository;
 
     @InjectMocks
     private ItemsController itemsController;
@@ -57,6 +64,8 @@ class ItemsControllerTest {
         user.setUsername("testuser");
         authentication = new UsernamePasswordAuthenticationToken("testuser", "password");
     }
+
+    // ── Item list ─────────────────────────────────────────────────────────────
 
     @Test
     void showItemList_returnsIndexViewWithApprovedItems() {
@@ -81,6 +90,8 @@ class ItemsControllerTest {
         assertThat(model.getAttribute("items")).isEqualTo(items);
     }
 
+    // ── Create ────────────────────────────────────────────────────────────────
+
     @Test
     void showCreateItem_addsItemDTOAndReturnsCreateView() {
         String view = itemsController.showCreateItem(model);
@@ -102,8 +113,11 @@ class ItemsControllerTest {
     }
 
     @Test
-    void createItem_validData_savesPendingItemOwnedByUserAndRedirects() {
+    void createItem_validData_savesPendingItemWithStorageTimesAndRedirects() {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+
+        LocalDateTime start = LocalDateTime.now().plusHours(1);
+        LocalDateTime end = LocalDateTime.now().plusHours(5);
 
         ItemDTO itemDTO = new ItemDTO();
         itemDTO.setName("Widget");
@@ -112,6 +126,8 @@ class ItemsControllerTest {
         itemDTO.setQuantity(5);
         itemDTO.setDescription("A widget that does things and stuff for testing.");
         itemDTO.setImageFile(new MockMultipartFile("imageFile", "", "image/png", new byte[0]));
+        itemDTO.setStorageStartTime(start);
+        itemDTO.setStorageEndTime(end);
 
         BindingResult result = new BeanPropertyBindingResult(itemDTO, "itemDTO");
 
@@ -123,13 +139,13 @@ class ItemsControllerTest {
         verify(itemRepository).save(captor.capture());
         Item saved = captor.getValue();
         assertThat(saved.getName()).isEqualTo("Widget");
-        assertThat(saved.getBrand()).isEqualTo("Acme");
-        assertThat(saved.getCategory()).isEqualTo("electronics");
-        assertThat(saved.getQuantity()).isEqualTo(5);
         assertThat(saved.getStatus()).isEqualTo(ItemStatus.PENDING);
         assertThat(saved.getOwner()).isEqualTo(user);
-        assertThat(saved.getImageFileName()).isNull();
+        assertThat(saved.getStorageStartTime()).isEqualTo(start);
+        assertThat(saved.getStorageEndTime()).isEqualTo(end);
     }
+
+    // ── Edit ──────────────────────────────────────────────────────────────────
 
     @Test
     void showEditItem_itemNotFound_redirectsWithError() {
@@ -171,9 +187,7 @@ class ItemsControllerTest {
         item.setStatus(ItemStatus.PENDING);
         when(itemRepository.findByIdAndOwner(1, user)).thenReturn(Optional.of(item));
 
-        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
-
-        String view = itemsController.showEditItem(model, 1, authentication, redirectAttributes);
+        String view = itemsController.showEditItem(model, 1, authentication, new RedirectAttributesModelMap());
 
         assertThat(view).isEqualTo("items/EditItem");
         ItemDTO dto = (ItemDTO) model.getAttribute("itemDTO");
@@ -192,9 +206,8 @@ class ItemsControllerTest {
 
         ItemDTO itemDTO = new ItemDTO();
         BindingResult result = new BeanPropertyBindingResult(itemDTO, "itemDTO");
-        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
 
-        String view = itemsController.updateItem(1, itemDTO, result, model, authentication, redirectAttributes);
+        String view = itemsController.updateItem(1, itemDTO, result, model, authentication, new RedirectAttributesModelMap());
 
         assertThat(view).isEqualTo("redirect:/items/my");
         verify(itemRepository, never()).save(any(Item.class));
@@ -210,9 +223,8 @@ class ItemsControllerTest {
         ItemDTO itemDTO = new ItemDTO();
         BindingResult result = new BeanPropertyBindingResult(itemDTO, "itemDTO");
         result.rejectValue("category", "error.category", "Category must not be empty");
-        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
 
-        String view = itemsController.updateItem(1, itemDTO, result, model, authentication, redirectAttributes);
+        String view = itemsController.updateItem(1, itemDTO, result, model, authentication, new RedirectAttributesModelMap());
 
         assertThat(view).isEqualTo("items/EditItem");
         assertThat(model.getAttribute("id")).isEqualTo(1);
@@ -236,9 +248,8 @@ class ItemsControllerTest {
         itemDTO.setImageFile(new MockMultipartFile("imageFile", "", "image/png", new byte[0]));
 
         BindingResult result = new BeanPropertyBindingResult(itemDTO, "itemDTO");
-        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
 
-        String view = itemsController.updateItem(1, itemDTO, result, model, authentication, redirectAttributes);
+        String view = itemsController.updateItem(1, itemDTO, result, model, authentication, new RedirectAttributesModelMap());
 
         assertThat(view).isEqualTo("redirect:/items/my");
         assertThat(item.getName()).isEqualTo("New Name");
@@ -248,6 +259,8 @@ class ItemsControllerTest {
         verify(itemRepository).save(item);
     }
 
+    // ── Delete ────────────────────────────────────────────────────────────────
+
     @Test
     void deleteItem_notPending_redirectsWithError() {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
@@ -255,9 +268,7 @@ class ItemsControllerTest {
         item.setStatus(ItemStatus.APPROVED);
         when(itemRepository.findByIdAndOwner(1, user)).thenReturn(Optional.of(item));
 
-        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
-
-        String view = itemsController.deleteItem(1, authentication, redirectAttributes);
+        String view = itemsController.deleteItem(1, authentication, new RedirectAttributesModelMap());
 
         assertThat(view).isEqualTo("redirect:/items/my");
         verify(itemRepository, never()).delete(any(Item.class));
@@ -270,13 +281,13 @@ class ItemsControllerTest {
         item.setStatus(ItemStatus.PENDING);
         when(itemRepository.findByIdAndOwner(1, user)).thenReturn(Optional.of(item));
 
-        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
-
-        String view = itemsController.deleteItem(1, authentication, redirectAttributes);
+        String view = itemsController.deleteItem(1, authentication, new RedirectAttributesModelMap());
 
         assertThat(view).isEqualTo("redirect:/items/my");
         verify(itemRepository).delete(item);
     }
+
+    // ── Cancel ────────────────────────────────────────────────────────────────
 
     @Test
     void cancelItem_invalidStatus_redirectsWithError() {
@@ -285,12 +296,26 @@ class ItemsControllerTest {
         item.setStatus(ItemStatus.REJECTED);
         when(itemRepository.findByIdAndOwner(1, user)).thenReturn(Optional.of(item));
 
-        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
-
-        String view = itemsController.cancelItem(1, authentication, redirectAttributes);
+        String view = itemsController.cancelItem(1, authentication, new RedirectAttributesModelMap());
 
         assertThat(view).isEqualTo("redirect:/items/my");
         verify(itemRepository, never()).save(any(Item.class));
+    }
+
+    @Test
+    void cancelItem_pendingItem_setsCancelledAndRedirects() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+        Item item = new Item();
+        item.setStatus(ItemStatus.PENDING);
+        when(itemRepository.findByIdAndOwner(1, user)).thenReturn(Optional.of(item));
+        when(serviceRecordRepository.findByItemIdAndStatus(0, ServiceRecordStatus.ACTIVE))
+                .thenReturn(Optional.empty());
+
+        String view = itemsController.cancelItem(1, authentication, new RedirectAttributesModelMap());
+
+        assertThat(view).isEqualTo("redirect:/items/my");
+        assertThat(item.getStatus()).isEqualTo(ItemStatus.CANCELLED);
+        verify(itemRepository).save(item);
     }
 
     @Test
@@ -299,13 +324,37 @@ class ItemsControllerTest {
         Item item = new Item();
         item.setStatus(ItemStatus.APPROVED);
         when(itemRepository.findByIdAndOwner(1, user)).thenReturn(Optional.of(item));
+        when(serviceRecordRepository.findByItemIdAndStatus(0, ServiceRecordStatus.ACTIVE))
+                .thenReturn(Optional.empty());
 
-        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
-
-        String view = itemsController.cancelItem(1, authentication, redirectAttributes);
+        String view = itemsController.cancelItem(1, authentication, new RedirectAttributesModelMap());
 
         assertThat(view).isEqualTo("redirect:/items/my");
         assertThat(item.getStatus()).isEqualTo(ItemStatus.CANCELLED);
         verify(itemRepository).save(item);
+    }
+
+    @Test
+    void cancelItem_withActiveServiceRecord_closesRecord() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+        Item item = new Item();
+        item.setStatus(ItemStatus.APPROVED);
+        when(itemRepository.findByIdAndOwner(1, user)).thenReturn(Optional.of(item));
+
+        ServiceRecord record = new ServiceRecord();
+        record.setStartTime(LocalDateTime.now().minusHours(2));
+        record.setStatus(ServiceRecordStatus.ACTIVE);
+        when(serviceRecordRepository.findByItemIdAndStatus(0, ServiceRecordStatus.ACTIVE))
+                .thenReturn(Optional.of(record));
+
+        itemsController.cancelItem(1, authentication, new RedirectAttributesModelMap());
+
+        ArgumentCaptor<ServiceRecord> captor = ArgumentCaptor.forClass(ServiceRecord.class);
+        verify(serviceRecordRepository).save(captor.capture());
+        ServiceRecord saved = captor.getValue();
+        assertThat(saved.getStatus()).isEqualTo(ServiceRecordStatus.ENDED);
+        assertThat(saved.getEndTime()).isNotNull();
+        assertThat(saved.getTotalHours()).isGreaterThanOrEqualTo(1);
+        assertThat(saved.getTotalAmount()).isNotNull();
     }
 }

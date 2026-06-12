@@ -2,10 +2,13 @@ package com.store.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -29,8 +32,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.store.model.Item;
 import com.store.model.ItemDTO;
 import com.store.model.ItemStatus;
+import com.store.model.ServiceRecord;
+import com.store.model.ServiceRecordStatus;
 import com.store.model.User;
 import com.store.service.ItemRepository;
+import com.store.service.ServiceRecordRepository;
 import com.store.service.UserRepository;
 
 import jakarta.validation.Valid;
@@ -44,11 +50,17 @@ public class ItemsController {
     @Value("${app.upload.dir}")
     private String uploadDir;
 
+    @Value("${app.rental.rate-per-hour}")
+    private int ratePerHour;
+
     @Autowired
     private ItemRepository itemRepository;
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ServiceRecordRepository serviceRecordRepository;
 
     @GetMapping({"", "/"})
     public String showItemList(Model model) {
@@ -89,6 +101,8 @@ public class ItemsController {
         item.setStatus(ItemStatus.PENDING);
         item.setOwner(user);
         item.setImageFileName(storeImage(itemDTO.getImageFile()));
+        item.setStorageStartTime(itemDTO.getStorageStartTime());
+        item.setStorageEndTime(itemDTO.getStorageEndTime());
 
         itemRepository.save(item);
 
@@ -179,6 +193,8 @@ public class ItemsController {
         item.setStatus(ItemStatus.CANCELLED);
         itemRepository.save(item);
 
+        closeServiceRecord(item);
+
         return "redirect:/items/my";
     }
 
@@ -213,6 +229,20 @@ public class ItemsController {
         }
 
         return storageFileName;
+    }
+
+    private void closeServiceRecord(Item item) {
+        serviceRecordRepository.findByItemIdAndStatus(item.getId(), ServiceRecordStatus.ACTIVE)
+                .ifPresent(record -> {
+                    LocalDateTime end = LocalDateTime.now();
+                    long hours = ChronoUnit.HOURS.between(record.getStartTime(), end);
+                    if (hours < 1) hours = 1;
+                    record.setEndTime(end);
+                    record.setTotalHours(hours);
+                    record.setTotalAmount(BigDecimal.valueOf((long) ratePerHour * hours));
+                    record.setStatus(ServiceRecordStatus.ENDED);
+                    serviceRecordRepository.save(record);
+                });
     }
 
     private void deleteImage(String fileName) {

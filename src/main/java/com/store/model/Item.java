@@ -1,5 +1,6 @@
 package com.store.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -43,6 +44,9 @@ public class Item {
 
     @Enumerated(EnumType.STRING)
     private ItemStatus status = ItemStatus.PENDING;
+
+    private LocalDateTime storageStartTime;
+    private LocalDateTime storageEndTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
@@ -119,6 +123,12 @@ public class Item {
     public void setStatus(ItemStatus status) {
         this.status = status;
     }
+
+    public LocalDateTime getStorageStartTime() { return storageStartTime; }
+    public void setStorageStartTime(LocalDateTime storageStartTime) { this.storageStartTime = storageStartTime; }
+
+    public LocalDateTime getStorageEndTime() { return storageEndTime; }
+    public void setStorageEndTime(LocalDateTime storageEndTime) { this.storageEndTime = storageEndTime; }
 
     public User getOwner() {
         return owner;

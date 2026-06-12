@@ -17,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +31,7 @@ import org.springframework.validation.BindingResult;
 
 import com.store.model.User;
 import com.store.model.UserDTO;
+import com.store.model.UserProfileDTO;
 import com.store.service.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,6 +60,8 @@ class AuthControllerTest {
     void tearDown() {
         SecurityContextHolder.clearContext();
     }
+
+    // ── Signup ────────────────────────────────────────────────────────────────
 
     @Test
     void signupForm_addsUserDTOToModelAndReturnsSignupView() {
@@ -143,6 +147,8 @@ class AuthControllerTest {
         assertThat(auth.getPrincipal()).isEqualTo(userDetails);
     }
 
+    // ── Login ─────────────────────────────────────────────────────────────────
+
     @Test
     void loginPage_returnsLoginView() {
         String view = authController.loginPage();
@@ -150,39 +156,118 @@ class AuthControllerTest {
         assertThat(view).isEqualTo("auth/login");
     }
 
-    @Test
-    void accountPage_whenNotAuthenticated_redirectsToLogin() {
-        SecurityContextHolder.clearContext();
-
-        String view = authController.accountPage(model);
-
-        assertThat(view).isEqualTo("redirect:/login");
-    }
+    // ── Account page ──────────────────────────────────────────────────────────
 
     @Test
-    void accountPage_whenAuthenticated_returnsAccountViewWithPrincipal() {
-        UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername("existinguser")
-                .password("encoded-password")
-                .authorities("ROLE_USER")
-                .build();
-        Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(auth);
+    void accountPage_incompleteProfile_addsUserAndProfileCompleteFalse() {
+        User user = new User();
+        user.setUsername("existinguser");
+        user.setEmail("existinguser@example.com");
 
-        String view = authController.accountPage(model);
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn("existinguser");
+        when(userRepository.findByUsername("existinguser")).thenReturn(Optional.of(user));
+
+        String view = authController.accountPage(model, auth);
 
         assertThat(view).isEqualTo("account");
-        assertThat(model.getAttribute("principal")).isEqualTo(userDetails);
+        assertThat(model.getAttribute("user")).isEqualTo(user);
+        assertThat(model.getAttribute("profileComplete")).isEqualTo(false);
     }
 
     @Test
-    void accountPage_whenAuthPresentButNotAuthenticated_redirectsToLogin() {
+    void accountPage_completeProfile_addsProfileCompleteTrue() {
+        User user = new User();
+        user.setUsername("fulluser");
+        user.setFullName("Ahmad Ali");
+        user.setIcNumber("900101-14-1234");
+        user.setPhoneNumber("011-12345678");
+        user.setAddress("123 Jalan Test, KL");
+
         Authentication auth = mock(Authentication.class);
-        when(auth.isAuthenticated()).thenReturn(false);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        when(auth.getName()).thenReturn("fulluser");
+        when(userRepository.findByUsername("fulluser")).thenReturn(Optional.of(user));
 
-        String view = authController.accountPage(model);
+        String view = authController.accountPage(model, auth);
 
-        assertThat(view).isEqualTo("redirect:/login");
+        assertThat(view).isEqualTo("account");
+        assertThat(model.getAttribute("profileComplete")).isEqualTo(true);
+    }
+
+    // ── Edit profile ──────────────────────────────────────────────────────────
+
+    @Test
+    void editProfileForm_returnsEditViewWithPrefilledDTO() {
+        User user = new User();
+        user.setUsername("testuser");
+        user.setFullName("Ahmad Ali");
+        user.setIcNumber("900101-14-1234");
+        user.setPhoneNumber("011-12345678");
+        user.setAddress("123 Jalan Test, KL");
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+
+        String view = authController.editProfileForm(model, auth);
+
+        assertThat(view).isEqualTo("account-edit");
+        UserProfileDTO dto = (UserProfileDTO) model.getAttribute("profileDTO");
+        assertThat(dto).isNotNull();
+        assertThat(dto.getFullName()).isEqualTo("Ahmad Ali");
+        assertThat(dto.getIcNumber()).isEqualTo("900101-14-1234");
+        assertThat(dto.getPhoneNumber()).isEqualTo("011-12345678");
+        assertThat(dto.getAddress()).isEqualTo("123 Jalan Test, KL");
+    }
+
+    @Test
+    void updateProfile_validationErrors_returnsEditView() {
+        User user = new User();
+        user.setUsername("testuser");
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+
+        UserProfileDTO dto = new UserProfileDTO();
+        dto.setFullName("");
+        BindingResult result = new BeanPropertyBindingResult(dto, "profileDTO");
+        result.rejectValue("fullName", "NotEmpty", "Full name is required");
+
+        String view = authController.updateProfile(dto, result, auth, model);
+
+        assertThat(view).isEqualTo("account-edit");
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void updateProfile_validData_updatesFieldsAndRedirects() {
+        User user = new User();
+        user.setUsername("testuser");
+
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+
+        UserProfileDTO dto = new UserProfileDTO();
+        dto.setFullName("Ahmad Ali");
+        dto.setIcNumber("900101-14-1234");
+        dto.setPhoneNumber("011-12345678");
+        dto.setAddress("123 Jalan Test, KL");
+        dto.setProfileImageFile(new MockMultipartFile("profileImageFile", "", "image/png", new byte[0]));
+
+        BindingResult result = new BeanPropertyBindingResult(dto, "profileDTO");
+
+        String view = authController.updateProfile(dto, result, auth, model);
+
+        assertThat(view).isEqualTo("redirect:/account");
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        User saved = captor.getValue();
+        assertThat(saved.getFullName()).isEqualTo("Ahmad Ali");
+        assertThat(saved.getIcNumber()).isEqualTo("900101-14-1234");
+        assertThat(saved.getPhoneNumber()).isEqualTo("011-12345678");
+        assertThat(saved.getAddress()).isEqualTo("123 Jalan Test, KL");
     }
 }

@@ -1,9 +1,13 @@
 package com.store.model;
 
+import java.time.LocalDateTime;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class ItemDTO {
@@ -22,6 +26,14 @@ public class ItemDTO {
     private String description;
 
     private MultipartFile imageFile;
+
+    @NotNull(message = "Storage start time is required")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime storageStartTime;
+
+    @NotNull(message = "Storage end time is required")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime storageEndTime;
 
     public String getName() {
         return name;
@@ -70,4 +82,10 @@ public class ItemDTO {
     public void setImageFile(MultipartFile imageFile) {
         this.imageFile = imageFile;
     }
+
+    public LocalDateTime getStorageStartTime() { return storageStartTime; }
+    public void setStorageStartTime(LocalDateTime storageStartTime) { this.storageStartTime = storageStartTime; }
+
+    public LocalDateTime getStorageEndTime() { return storageEndTime; }
+    public void setStorageEndTime(LocalDateTime storageEndTime) { this.storageEndTime = storageEndTime; }
 }

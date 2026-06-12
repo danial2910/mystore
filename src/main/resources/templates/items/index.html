@@ -216,6 +216,7 @@
                 <th>Brand</th>
                 <th>Category</th>
                 <th>Quantity</th>
+                <th>Storage Period</th>
                 <th>Image</th>
                 <th>Created</th>
               </tr>
@@ -227,6 +228,14 @@
                 <td><span class="item-category" th:text="${item.category}">Category</span></td>
                 <td><div class="item-quantity" th:text="${item.quantity}">0</div></td>
                 <td>
+                  <div th:if="${item.storageStartTime}" style="font-size:0.85rem;">
+                    <span th:text="${#temporals.format(item.storageStartTime, 'dd MMM yyyy HH:mm')}"></span>
+                    <span style="color:#64748b;"> → </span>
+                    <span th:text="${#temporals.format(item.storageEndTime, 'dd MMM yyyy HH:mm')}"></span>
+                  </div>
+                  <div th:unless="${item.storageStartTime}" style="color:#64748b;font-size:0.85rem;">—</div>
+                </td>
+                <td>
                   <img th:if="${item.imageFileName}" th:src="@{'/images/' + ${item.imageFileName}}"
                        alt="Item Image" class="item-image" width="80" height="80">
                 </td>
@@ -234,7 +243,7 @@
               </tr>
 
               <tr th:if="${#lists.isEmpty(items)}">
-                <td colspan="6">
+                <td colspan="7">
                   <div class="empty-state">
                     <i class="fas fa-box-open"></i>
                     <h3>No Items Available</h3>
