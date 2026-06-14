@@ -1,5 +1,6 @@
 package com.store.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -37,6 +38,10 @@ public class ServiceRecord {
     @Enumerated(EnumType.STRING)
     private ServiceRecordStatus status = ServiceRecordStatus.ACTIVE;
 
+    @Column(columnDefinition = "boolean default false not null")
+    private boolean paid = false;
+    private LocalDateTime paidAt;
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -60,4 +65,10 @@ public class ServiceRecord {
 
     public ServiceRecordStatus getStatus() { return status; }
     public void setStatus(ServiceRecordStatus status) { this.status = status; }
+
+    public boolean isPaid() { return paid; }
+    public void setPaid(boolean paid) { this.paid = paid; }
+
+    public LocalDateTime getPaidAt() { return paidAt; }
+    public void setPaidAt(LocalDateTime paidAt) { this.paidAt = paidAt; }
 }

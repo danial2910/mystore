@@ -141,7 +141,10 @@
             <a class="nav-pill" th:href="@{/items}"><i class="fas fa-boxes me-1"></i>Inventory</a>
             <a class="nav-pill" th:href="@{/items/my}"><i class="fas fa-list me-1"></i>My Items</a>
             <a class="nav-pill" th:href="@{/billing/my}"><i class="fas fa-file-invoice-dollar me-1"></i>My Bills</a>
+            <a th:if="${isAdmin}" class="nav-pill" th:href="@{/admin/dashboard}"><i class="fas fa-gauge-high me-1"></i>Dashboard</a>
             <a th:if="${isAdmin}" class="nav-pill" th:href="@{/admin/items}"><i class="fas fa-user-shield me-1"></i>Admin</a>
+            <a th:if="${isAdmin}" class="nav-pill" th:href="@{/admin/billing}"><i class="fas fa-money-check-dollar me-1"></i>Admin Billing</a>
+            <a th:if="${isAdmin}" class="nav-pill" th:href="@{/admin/extensions}"><i class="fas fa-calendar-plus me-1"></i>Extensions</a>
         </div>
     </div>
 

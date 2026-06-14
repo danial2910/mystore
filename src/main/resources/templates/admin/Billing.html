@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Billing - Danial Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+      :root {
+        --primary-color: #6366f1;
+        --primary-dark: #4f46e5;
+        --light-color: #f8fafc;
+        --border-color: #e2e8f0;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .header-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+      }
+
+      .page-title {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .page-subtitle {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+      }
+
+      .nav-bar {
+        background: white;
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .nav-links a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        margin-right: 1.5rem;
+      }
+
+      .nav-links a:hover {
+        text-decoration: underline;
+      }
+
+      .items-count {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--primary-color);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .items-container {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+      }
+
+      .table-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        padding: 1.5rem 2rem;
+      }
+
+      .table-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .modern-table {
+        margin: 0;
+        width: 100%;
+      }
+
+      .modern-table thead th {
+        background: var(--light-color);
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.5rem;
+        border-bottom: 2px solid var(--border-color);
+        border-top: none;
+      }
+
+      .modern-table tbody td {
+        padding: 1.25rem 1.5rem;
+        vertical-align: middle;
+        border-color: var(--border-color);
+      }
+
+      .item-name {
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .item-owner {
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .amount-final { font-weight: 700; color: #10b981; }
+      .amount-ongoing { font-weight: 700; color: #f59e0b; }
+
+      .status-active { background:rgba(16,185,129,.15); color:#059669; border:1px solid rgba(16,185,129,.3); padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+      .status-ended { background:rgba(100,116,139,.15); color:#64748b; border:1px solid rgba(100,116,139,.3); padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+      .status-paid { background:rgba(16,185,129,.15); color:#059669; border:1px solid rgba(16,185,129,.3); padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+      .status-unpaid { background:rgba(239,68,68,.15); color:#b91c1c; border:1px solid rgba(239,68,68,.3); padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+      .status-overdue { background:rgba(239,68,68,.15); color:#b91c1c; border:1px solid rgba(239,68,68,.3); padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; display:inline-block; margin-top:4px; }
+
+      .late-fee-info {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--primary-color);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .btn-action {
+        border: none;
+        padding: 6px 14px;
+        border-radius: 14px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .btn-mark-paid {
+        background: rgba(16, 185, 129, 0.15);
+        color: #047857;
+      }
+
+      .btn-mark-paid:hover {
+        background: rgba(16, 185, 129, 0.25);
+      }
+
+      .btn-mark-unpaid {
+        background: rgba(239, 68, 68, 0.15);
+        color: #b91c1c;
+      }
+
+      .btn-mark-unpaid:hover {
+        background: rgba(239, 68, 68, 0.25);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+      }
+
+      .empty-state i {
+        font-size: 4rem;
+        color: var(--border-color);
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header-section">
+      <div class="container text-center">
+        <h1 class="page-title"><i class="fas fa-money-check-dollar me-3"></i>Billing</h1>
+        <p class="page-subtitle">Review service records and track payments</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="nav-bar">
+        <div class="nav-links">
+          <a th:href="@{/items}"><i class="fas fa-home me-1"></i>Inventory</a>
+          <a th:href="@{/items/my}"><i class="fas fa-user me-1"></i>My Items</a>
+          <a th:href="@{/admin/dashboard}"><i class="fas fa-gauge-high me-1"></i>Dashboard</a>
+          <a th:href="@{/admin/items}"><i class="fas fa-user-shield me-1"></i>Admin</a>
+          <a th:href="@{/admin/billing}"><i class="fas fa-money-check-dollar me-1"></i>Billing</a>
+          <a th:href="@{/admin/extensions}"><i class="fas fa-calendar-plus me-1"></i>Extensions</a>
+          <a th:href="@{/account}"><i class="fas fa-id-badge me-1"></i>Account</a>
+        </div>
+        <div class="items-count">
+          <i class="fas fa-list me-1"></i>
+          <span th:text="${#lists.size(records)} + ' Records'">0 Records</span>
+        </div>
+        <div class="late-fee-info">
+          <i class="fas fa-triangle-exclamation me-1"></i>
+          Late fee: <span th:text="${lateFeeMultiplier}">1.5</span>x after storage end time
+        </div>
+      </div>
+
+      <div class="items-container">
+        <div class="table-header">
+          <h2 class="table-title"><i class="fas fa-file-invoice-dollar me-2"></i>Service Records</h2>
+        </div>
+
+        <div class="table-responsive">
+          <table class="modern-table table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Owner</th>
+                <th>Started</th>
+                <th>Ended</th>
+                <th>Hours</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="record : ${records}">
+                <td>
+                  <div class="item-name" th:text="${record.item.name}">Item</div>
+                  <div class="text-muted small" th:text="${record.item.category}">Category</div>
+                </td>
+                <td><div class="item-owner" th:text="${record.owner.username}">username</div></td>
+                <td class="small" th:text="${#temporals.format(record.startTime, 'dd MMM yyyy HH:mm')}">—</td>
+                <td class="small"
+                    th:text="${record.endTime != null} ? ${#temporals.format(record.endTime, 'dd MMM yyyy HH:mm')} : '—'">—</td>
+                <td>
+                  <span th:if="${record.status.name() == 'ACTIVE'}" th:text="${(liveHoursMap[record.id] ?: 1) + ' hr(s)'}">—</span>
+                  <span th:unless="${record.status.name() == 'ACTIVE'}" th:text="${record.totalHours + ' hr(s)'}">—</span>
+                </td>
+                <td>
+                  <div th:if="${record.status.name() == 'ACTIVE'}" class="amount-ongoing">
+                    RM <span th:text="${liveAmountMap[record.id] ?: ratePerHour}">—</span>
+                  </div>
+                  <div th:unless="${record.status.name() == 'ACTIVE'}" class="amount-final">
+                    RM <span th:text="${record.totalAmount}">0</span>
+                  </div>
+                </td>
+                <td>
+                  <span th:if="${record.status.name() == 'ACTIVE'}" class="status-active">
+                    <i class="fas fa-circle me-1" style="font-size:.5rem;"></i>Active
+                  </span>
+                  <span th:unless="${record.status.name() == 'ACTIVE'}" class="status-ended">Ended</span>
+                  <div th:if="${overdueMap[record.id]}" class="status-overdue">
+                    <i class="fas fa-triangle-exclamation me-1"></i>Overdue
+                  </div>
+                </td>
+                <td>
+                  <span th:if="${record.paid}" class="status-paid">
+                    <i class="fas fa-check me-1"></i>Paid
+                  </span>
+                  <span th:unless="${record.paid}" class="status-unpaid">Unpaid</span>
+                  <div th:if="${record.paid and record.paidAt != null}" class="text-muted small mt-1"
+                       th:text="${#temporals.format(record.paidAt, 'dd MMM yyyy HH:mm')}">—</div>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <form th:if="${!record.paid}" th:action="@{'/admin/billing/' + ${record.id} + '/mark-paid'}" method="post" style="display:inline;">
+                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                      <button type="submit" class="btn-action btn-mark-paid"><i class="fas fa-check"></i>Mark Paid</button>
+                    </form>
+                    <form th:if="${record.paid}" th:action="@{'/admin/billing/' + ${record.id} + '/mark-unpaid'}" method="post" style="display:inline;">
+                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                      <button type="submit" class="btn-action btn-mark-unpaid"><i class="fas fa-times"></i>Mark Unpaid</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+
+              <tr th:if="${#lists.isEmpty(records)}">
+                <td colspan="9">
+                  <div class="empty-state">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <h3>No Service Records</h3>
+                    <p>There are no service records yet.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

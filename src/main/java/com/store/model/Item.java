@@ -47,10 +47,18 @@ public class Item {
 
     private LocalDateTime storageStartTime;
     private LocalDateTime storageEndTime;
+    private LocalDateTime requestedStorageEndTime;
+
+    private LocalDateTime approvedAt;
+    private LocalDateTime rejectedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "approved_by_id")
+    private User approvedBy;
 
     public int getId() {
         return id;
@@ -130,6 +138,9 @@ public class Item {
     public LocalDateTime getStorageEndTime() { return storageEndTime; }
     public void setStorageEndTime(LocalDateTime storageEndTime) { this.storageEndTime = storageEndTime; }
 
+    public LocalDateTime getRequestedStorageEndTime() { return requestedStorageEndTime; }
+    public void setRequestedStorageEndTime(LocalDateTime requestedStorageEndTime) { this.requestedStorageEndTime = requestedStorageEndTime; }
+
     public User getOwner() {
         return owner;
     }
@@ -137,4 +148,13 @@ public class Item {
     public void setOwner(User owner) {
         this.owner = owner;
     }
+
+    public LocalDateTime getApprovedAt() { return approvedAt; }
+    public void setApprovedAt(LocalDateTime approvedAt) { this.approvedAt = approvedAt; }
+
+    public LocalDateTime getRejectedAt() { return rejectedAt; }
+    public void setRejectedAt(LocalDateTime rejectedAt) { this.rejectedAt = rejectedAt; }
+
+    public User getApprovedBy() { return approvedBy; }
+    public void setApprovedBy(User approvedBy) { this.approvedBy = approvedBy; }
 }

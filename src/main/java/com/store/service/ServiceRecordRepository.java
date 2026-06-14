@@ -10,5 +10,7 @@ import java.util.Optional;
 
 public interface ServiceRecordRepository extends JpaRepository<ServiceRecord, Integer> {
     List<ServiceRecord> findByOwnerOrderByStartTimeDesc(User owner);
+    List<ServiceRecord> findAllByOrderByStartTimeDesc();
+    long countByStatus(ServiceRecordStatus status);
     Optional<ServiceRecord> findByItemIdAndStatus(int itemId, ServiceRecordStatus status);
 }

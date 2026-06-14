@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard - Danial Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+      :root {
+        --primary-color: #6366f1;
+        --primary-dark: #4f46e5;
+        --light-color: #f8fafc;
+        --border-color: #e2e8f0;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .header-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+      }
+
+      .page-title {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .page-subtitle {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+      }
+
+      .nav-bar {
+        background: white;
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .nav-links a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        margin-right: 1.5rem;
+      }
+
+      .nav-links a:hover {
+        text-decoration: underline;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.75rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+      }
+
+      .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        flex-shrink: 0;
+      }
+
+      .stat-icon.pending { background: linear-gradient(135deg, #f59e0b, #d97706); }
+      .stat-icon.approved { background: linear-gradient(135deg, #10b981, #059669); }
+      .stat-icon.active { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); }
+      .stat-icon.users { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+      .stat-icon.outstanding { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+      .stat-icon.overdue { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+      .stat-icon.extensions { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+
+      .stat-value {
+        font-size: 1.9rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1.1;
+      }
+
+      .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .quick-links {
+        background: white;
+        border-radius: 20px;
+        padding: 1.75rem;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+      }
+
+      .quick-links h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      .quick-link-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 10px 18px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-right: 1rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+      }
+
+      .quick-link-btn:hover {
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header-section">
+      <div class="container text-center">
+        <h1 class="page-title"><i class="fas fa-gauge-high me-3"></i>Admin Dashboard</h1>
+        <p class="page-subtitle">Overview of inventory, rentals and billing</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="nav-bar">
+        <div class="nav-links">
+          <a th:href="@{/items}"><i class="fas fa-home me-1"></i>Inventory</a>
+          <a th:href="@{/items/my}"><i class="fas fa-user me-1"></i>My Items</a>
+          <a th:href="@{/admin/dashboard}"><i class="fas fa-gauge-high me-1"></i>Dashboard</a>
+          <a th:href="@{/admin/items}"><i class="fas fa-user-shield me-1"></i>Admin</a>
+          <a th:href="@{/admin/billing}"><i class="fas fa-money-check-dollar me-1"></i>Billing</a>
+          <a th:href="@{/admin/extensions}"><i class="fas fa-calendar-plus me-1"></i>Extensions</a>
+          <a th:href="@{/account}"><i class="fas fa-id-badge me-1"></i>Account</a>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon pending"><i class="fas fa-hourglass-half"></i></div>
+          <div>
+            <div class="stat-value" th:text="${pendingItemsCount}">0</div>
+            <div class="stat-label">Pending Items</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon approved"><i class="fas fa-boxes"></i></div>
+          <div>
+            <div class="stat-value" th:text="${approvedItemsCount}">0</div>
+            <div class="stat-label">Items in Inventory</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon active"><i class="fas fa-warehouse"></i></div>
+          <div>
+            <div class="stat-value" th:text="${activeRentalsCount}">0</div>
+            <div class="stat-label">Active Rentals</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon overdue"><i class="fas fa-triangle-exclamation"></i></div>
+          <div>
+            <div class="stat-value" th:text="${overdueRentalsCount}">0</div>
+            <div class="stat-label">Overdue Rentals</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon extensions"><i class="fas fa-calendar-plus"></i></div>
+          <div>
+            <div class="stat-value" th:text="${pendingExtensionsCount}">0</div>
+            <div class="stat-label">Extension Requests</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon users"><i class="fas fa-users"></i></div>
+          <div>
+            <div class="stat-value" th:text="${totalUsers}">0</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon outstanding"><i class="fas fa-money-bill-wave"></i></div>
+          <div>
+            <div class="stat-value">RM <span th:text="${totalOutstanding}">0</span></div>
+            <div class="stat-label">Outstanding Revenue</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-links">
+        <h2>Quick Actions</h2>
+        <a class="quick-link-btn" th:href="@{/admin/items}"><i class="fas fa-clipboard-check"></i>Review Pending Items</a>
+        <a class="quick-link-btn" th:href="@{/admin/billing}"><i class="fas fa-file-invoice-dollar"></i>Manage Billing</a>
+        <a class="quick-link-btn" th:href="@{/admin/extensions}"><i class="fas fa-calendar-plus"></i>Review Extension Requests</a>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

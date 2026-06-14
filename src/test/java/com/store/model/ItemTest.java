@@ -14,8 +14,14 @@ class ItemTest {
         User owner = new User();
         owner.setUsername("owner");
 
+        User admin = new User();
+        admin.setUsername("admin");
+
         LocalDateTime start = LocalDateTime.of(2026, 1, 1, 10, 0);
         LocalDateTime end = LocalDateTime.of(2026, 1, 1, 16, 0);
+        LocalDateTime requestedEnd = LocalDateTime.of(2026, 1, 2, 16, 0);
+        LocalDateTime approvedAt = LocalDateTime.of(2026, 1, 1, 9, 0);
+        LocalDateTime rejectedAt = LocalDateTime.of(2026, 1, 1, 9, 30);
         Date createdAt = new Date();
 
         Item item = new Item();
@@ -30,7 +36,11 @@ class ItemTest {
         item.setStatus(ItemStatus.APPROVED);
         item.setStorageStartTime(start);
         item.setStorageEndTime(end);
+        item.setRequestedStorageEndTime(requestedEnd);
         item.setOwner(owner);
+        item.setApprovedAt(approvedAt);
+        item.setRejectedAt(rejectedAt);
+        item.setApprovedBy(admin);
 
         assertThat(item.getId()).isEqualTo(1);
         assertThat(item.getName()).isEqualTo("Box");
@@ -43,7 +53,11 @@ class ItemTest {
         assertThat(item.getStatus()).isEqualTo(ItemStatus.APPROVED);
         assertThat(item.getStorageStartTime()).isEqualTo(start);
         assertThat(item.getStorageEndTime()).isEqualTo(end);
+        assertThat(item.getRequestedStorageEndTime()).isEqualTo(requestedEnd);
         assertThat(item.getOwner()).isEqualTo(owner);
+        assertThat(item.getApprovedAt()).isEqualTo(approvedAt);
+        assertThat(item.getRejectedAt()).isEqualTo(rejectedAt);
+        assertThat(item.getApprovedBy()).isEqualTo(admin);
     }
 
     @Test

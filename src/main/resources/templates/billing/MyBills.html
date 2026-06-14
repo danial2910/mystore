@@ -23,6 +23,9 @@
         .modern-table tbody td { padding:1.25rem 1.5rem; vertical-align:middle; border-color:var(--border); }
         .status-active { background:rgba(16,185,129,.15); color:#059669; border:1px solid rgba(16,185,129,.3); padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
         .status-ended { background:rgba(100,116,139,.15); color:#64748b; border:1px solid rgba(100,116,139,.3); padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+        .status-paid { background:rgba(16,185,129,.15); color:#059669; border:1px solid rgba(16,185,129,.3); padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+        .status-unpaid { background:rgba(239,68,68,.15); color:#b91c1c; border:1px solid rgba(239,68,68,.3); padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+        .status-overdue { background:rgba(239,68,68,.15); color:#b91c1c; border:1px solid rgba(239,68,68,.3); padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; display:inline-block; margin-top:4px; }
         .amount-final { font-weight:700; color:#10b981; }
         .amount-ongoing { font-weight:700; color:#f59e0b; }
         .empty-state { text-align:center; padding:4rem 2rem; color:#64748b; }
@@ -44,7 +47,10 @@
                 <a th:href="@{/items}"><i class="fas fa-boxes me-1"></i>Inventory</a>
                 <a th:href="@{/items/my}"><i class="fas fa-user me-1"></i>My Items</a>
                 <a th:href="@{/billing/my}"><i class="fas fa-file-invoice-dollar me-1"></i>My Bills</a>
+                <a th:if="${isAdmin}" th:href="@{/admin/dashboard}"><i class="fas fa-gauge-high me-1"></i>Dashboard</a>
                 <a th:if="${isAdmin}" th:href="@{/admin/items}"><i class="fas fa-user-shield me-1"></i>Admin</a>
+                <a th:if="${isAdmin}" th:href="@{/admin/billing}"><i class="fas fa-money-check-dollar me-1"></i>Admin Billing</a>
+                <a th:if="${isAdmin}" th:href="@{/admin/extensions}"><i class="fas fa-calendar-plus me-1"></i>Extensions</a>
                 <a th:href="@{/account}"><i class="fas fa-id-badge me-1"></i>Account</a>
             </div>
         </div>
@@ -57,11 +63,14 @@
                     <div class="fw-bold mt-1" style="font-size:2rem;">
                         RM <span th:text="${totalOwed}">0.00</span>
                     </div>
-                    <div style="opacity:.8;font-size:.85rem;" class="mt-1">Based on active service records (updates on refresh)</div>
+                    <div style="opacity:.8;font-size:.85rem;" class="mt-1">Active and unpaid completed service records (updates on refresh)</div>
                 </div>
                 <div class="rate-info">
                     <i class="fas fa-clock me-1"></i>
                     Rate: RM <span th:text="${ratePerHour}">5</span>.00 / hour per item
+                    <br>
+                    <i class="fas fa-triangle-exclamation me-1"></i>
+                    Late fee: <span th:text="${lateFeeMultiplier}">1.5</span>x after storage end time
                 </div>
             </div>
         </div>
@@ -82,6 +91,7 @@
                             <th>Hours Used</th>
                             <th>Amount</th>
                             <th>Status</th>
+                            <th>Payment</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,10 +131,21 @@
                                     <i class="fas fa-circle me-1" style="font-size:.5rem;"></i>Active
                                 </span>
                                 <span th:unless="${record.status.name() == 'ACTIVE'}" class="status-ended">Ended</span>
+                                <div th:if="${overdueMap[record.id]}" class="status-overdue">
+                                    <i class="fas fa-triangle-exclamation me-1"></i>Overdue
+                                </div>
+                            </td>
+                            <td>
+                                <span th:if="${record.paid}" class="status-paid">
+                                    <i class="fas fa-check me-1"></i>Paid
+                                </span>
+                                <span th:unless="${record.paid}" class="status-unpaid">Unpaid</span>
+                                <div th:if="${record.paid and record.paidAt != null}" class="text-muted small mt-1"
+                                     th:text="${#temporals.format(record.paidAt, 'dd MMM yyyy HH:mm')}">—</div>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(records)}">
-                            <td colspan="8">
+                            <td colspan="9">
                                 <div class="empty-state">
                                     <i class="fas fa-file-invoice d-block"></i>
                                     <h3>No Service Records</h3>

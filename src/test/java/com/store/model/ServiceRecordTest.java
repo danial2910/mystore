@@ -25,6 +25,8 @@ class ServiceRecordTest {
         record.setTotalHours(3);
         record.setTotalAmount(BigDecimal.valueOf(15));
         record.setStatus(ServiceRecordStatus.ENDED);
+        record.setPaid(true);
+        record.setPaidAt(end);
 
         assertThat(record.getId()).isEqualTo(5);
         assertThat(record.getItem()).isEqualTo(item);
@@ -34,11 +36,20 @@ class ServiceRecordTest {
         assertThat(record.getTotalHours()).isEqualTo(3);
         assertThat(record.getTotalAmount()).isEqualByComparingTo(BigDecimal.valueOf(15));
         assertThat(record.getStatus()).isEqualTo(ServiceRecordStatus.ENDED);
+        assertThat(record.isPaid()).isTrue();
+        assertThat(record.getPaidAt()).isEqualTo(end);
     }
 
     @Test
     void defaultStatus_isActive() {
         ServiceRecord record = new ServiceRecord();
         assertThat(record.getStatus()).isEqualTo(ServiceRecordStatus.ACTIVE);
+    }
+
+    @Test
+    void defaultPaid_isFalse() {
+        ServiceRecord record = new ServiceRecord();
+        assertThat(record.isPaid()).isFalse();
+        assertThat(record.getPaidAt()).isNull();
     }
 }
